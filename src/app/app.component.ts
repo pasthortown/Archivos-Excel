@@ -3,6 +3,7 @@ import { ToastrService } from 'ngx-toastr';
 import { NgxFileDropEntry, FileSystemFileEntry } from 'ngx-file-drop';
 import { FileSaverService } from 'ngx-filesaver';
 import * as XLSX from 'xlsx';
+import { NgxSpinnerService } from 'ngx-spinner';
 
 @Component({
   selector: 'app-root',
@@ -20,7 +21,8 @@ export class AppComponent {
 
   constructor(
     private toastr: ToastrService,
-    private fileServerService: FileSaverService
+    private fileServerService: FileSaverService,
+    private spinner: NgxSpinnerService
     ) { }
 
   select_option(opcion: string) {
@@ -88,33 +90,57 @@ export class AppComponent {
     this.validate_files();
   }
 
+  do_consolidado() {
+    this.files.forEach((file: any) => {
+      let workbook = XLSX.read(file.file_base64, { type: 'base64' });
+      let content: any[] = [];
+      workbook.SheetNames.forEach(sheetName => {
+        let worksheet = workbook.Sheets[sheetName];
+        let worksheet_json = XLSX.utils.sheet_to_json(worksheet);
+        worksheet_json.forEach((row: any) => {
+          row['Ajuste Distribuido'] = '';
+        });
+        content.push(worksheet_json);
+      });
+      file.content = content;
+    });
+    this.merge_xlsx(this.files, 'merged');
+  }
+
   process_files(seleccion: string) {
     if (seleccion == 'Consolidado') {
-      this.files.forEach((file: any) => {
-        let workbook = XLSX.read(file.file_base64, { type: 'base64' });
-        let content: any[] = [];
-        workbook.SheetNames.forEach(sheetName => {
-          let worksheet = workbook.Sheets[sheetName];
-          content.push(XLSX.utils.sheet_to_json(worksheet, { header: 1 }));
-        });
-        file.content = content;
-      });
-      console.log(this.files);
+      this.spinner.show();
+      setTimeout(() => {
+        this.do_consolidado();
+        this.spinner.hide();
+        this.files = [];
+        this.validate_files();
+      }, 100)
     } else {
       console.log(this.seleccion);
     }
-    this.download_excel(['A','B','C'], [[1,2,3], [4,5,6]], 'prueba');
   }
 
-  download_excel(headers: string[], rows: any[], filename: string) {
-    let ws_data: any[] = [];
-    ws_data.push(headers);
-    rows.forEach((row: any) => {
-      ws_data.push(row);
+  merge_xlsx(files: any[], filename: string) {
+    let merged: any[] = [];
+    files.forEach((file: any) => {
+      file.content.forEach((sheet: any) => {
+        sheet.forEach((row: any) => {
+          merged.push(row);
+        });
+      });
     });
-    const ws: XLSX.WorkSheet = XLSX.utils.aoa_to_sheet(ws_data);
     const wb: XLSX.WorkBook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb,ws,'RUCS');
+    wb.Props = {
+      Title: 'Consolidado de Plan Celular',
+      Subject: 'Consolidado de Plan Celular',
+      Author: 'Grupo KFC',
+      CreatedDate: new Date(),
+      Keywords: 'office Plan Celular',
+      Category: 'Plan Celular',
+    };
+    const ws: XLSX.WorkSheet = XLSX.utils.json_to_sheet(merged);
+    XLSX.utils.book_append_sheet(wb,ws,'Hoja1');
     const filename_xlsx: string = (new Date()).toLocaleDateString() + '_' + filename + '.xlsx';
     XLSX.writeFile(wb, filename_xlsx);
   }
