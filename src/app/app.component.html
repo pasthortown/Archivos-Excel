@@ -6,9 +6,9 @@
     </label>
     <div class="btn-group" role="group" aria-label="Basic mixed styles example">
       <button type="button" class="btn btn-info" *ngIf="seleccion=='Consolidado'">Consolidado de Archivos</button>
-      <button type="button" class="btn btn-outline-info" *ngIf="seleccion!=='Consolidado'" (click)="seleccion='Consolidado'">Consolidado de Archivos</button>
+      <button type="button" class="btn btn-outline-info" *ngIf="seleccion!=='Consolidado'" (click)="select_option('Consolidado')">Consolidado de Archivos</button>
       <button type="button" class="btn btn-info" *ngIf="seleccion=='Transformación'">Transformación de Archivos</button>
-      <button type="button" class="btn btn-outline-info" *ngIf="seleccion!=='Transformación'" (click)="seleccion='Transformación'">Transformación de Archivos</button>
+      <button type="button" class="btn btn-outline-info" *ngIf="seleccion!=='Transformación'" (click)="select_option('Transformación')">Transformación de Archivos</button>
     </div>
   </div>
 </nav>

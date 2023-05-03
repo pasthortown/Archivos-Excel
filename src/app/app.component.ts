@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
 import { NgxFileDropEntry, FileSystemFileEntry } from 'ngx-file-drop';
 import { FileSaverService } from 'ngx-filesaver';
+import * as XLSX from 'xlsx';
 
 @Component({
   selector: 'app-root',
@@ -15,12 +16,18 @@ export class AppComponent {
   max_file_size: number = 10;
   max_file_count: number = 50;
   files: any[] = [];
-  accept: string = '*';
+  accept: string = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel';
 
   constructor(
     private toastr: ToastrService,
     private fileServerService: FileSaverService
     ) { }
+
+  select_option(opcion: string) {
+    this.seleccion = opcion;
+    this.files = [];
+    this.validate_file_size = false;
+  }
 
   dropped(files: NgxFileDropEntry[]) {
     for (const droppedFile of files) {
@@ -82,6 +89,33 @@ export class AppComponent {
   }
 
   process_files(seleccion: string) {
-    console.log(seleccion);
+    if (seleccion == 'Consolidado') {
+      this.files.forEach((file: any) => {
+        let workbook = XLSX.read(file.file_base64, { type: 'base64' });
+        let content: any[] = [];
+        workbook.SheetNames.forEach(sheetName => {
+          let worksheet = workbook.Sheets[sheetName];
+          content.push(XLSX.utils.sheet_to_json(worksheet, { header: 1 }));
+        });
+        file.content = content;
+      });
+      console.log(this.files);
+    } else {
+      console.log(this.seleccion);
+    }
+    this.download_excel(['A','B','C'], [[1,2,3], [4,5,6]]);
+  }
+
+  download_excel(headers: string[], rows: any[]) {
+    let ws_data: any[] = [];
+    ws_data.push(headers);
+    rows.forEach((row: any) => {
+      ws_data.push(row);
+    });
+    const ws: XLSX.WorkSheet = XLSX.utils.aoa_to_sheet(ws_data);
+    const wb: XLSX.WorkBook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb,ws,'RUCS');
+    const filename: string = (new Date()).toLocaleDateString() + '_prueba.xlsx';
+    XLSX.writeFile(wb, filename);
   }
 }
