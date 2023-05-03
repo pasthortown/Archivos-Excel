@@ -103,10 +103,10 @@ export class AppComponent {
     } else {
       console.log(this.seleccion);
     }
-    this.download_excel(['A','B','C'], [[1,2,3], [4,5,6]]);
+    this.download_excel(['A','B','C'], [[1,2,3], [4,5,6]], 'prueba');
   }
 
-  download_excel(headers: string[], rows: any[]) {
+  download_excel(headers: string[], rows: any[], filename: string) {
     let ws_data: any[] = [];
     ws_data.push(headers);
     rows.forEach((row: any) => {
@@ -115,7 +115,7 @@ export class AppComponent {
     const ws: XLSX.WorkSheet = XLSX.utils.aoa_to_sheet(ws_data);
     const wb: XLSX.WorkBook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb,ws,'RUCS');
-    const filename: string = (new Date()).toLocaleDateString() + '_prueba.xlsx';
-    XLSX.writeFile(wb, filename);
+    const filename_xlsx: string = (new Date()).toLocaleDateString() + '_' + filename + '.xlsx';
+    XLSX.writeFile(wb, filename_xlsx);
   }
 }
