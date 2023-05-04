@@ -19,13 +19,15 @@
   <div class="row mt-2">
     <h1>{{seleccion}} de Archivos</h1>
     <div class="col-12">
+      <b *ngIf="seleccion!=='Consolidado'"><br/>Tomar en cuenta que El archivo debe tener las cabeceras en la Línea 8.<br/><br/></b>
       <ngx-file-drop dropZoneLabel="Arrastre los Archivos Aquí" (onFileDrop)="dropped($event)" accept="{{accept}}">
         <ng-template ngx-file-drop-content-tmp let-openFileSelector="openFileSelector">
           <p class="col-12 text-center" (click)="openFileSelector()">
-            <span *ngIf="max_file_count > 1">
+            <span>
               <small>Arrastre aquí el o los archivos que desea compartir.<br/>
               Se acepta máximo {{max_file_size}}MB por cada Archivo.<br/>
-              Se aceptan máximo {{max_file_count}} archivos.</small>
+              Se aceptan máximo {{max_file_count}} archivos.
+              </small>
             </span>
           </p>
         </ng-template>

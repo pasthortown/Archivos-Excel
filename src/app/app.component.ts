@@ -14,8 +14,8 @@ export class AppComponent {
   title = 'xlsmergetool';
   seleccion = 'Consolidado';
   validate_file_size: boolean = false;
-  max_file_size: number = 10;
-  max_file_count: number = 50;
+  max_file_size: number = 20;
+  max_file_count: number = 100;
   files: any[] = [];
   accept: string = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel';
 
@@ -27,8 +27,15 @@ export class AppComponent {
 
   select_option(opcion: string) {
     this.seleccion = opcion;
+    if (opcion == 'Consolidado') {
+      this.max_file_size = 20;
+      this.max_file_count = 100;
+    } else {
+      this.max_file_size = 20;
+      this.max_file_count = 1;
+    }
     this.files = [];
-    this.validate_file_size = false;
+    this.validate_files();
   }
 
   dropped(files: NgxFileDropEntry[]) {
@@ -117,8 +124,62 @@ export class AppComponent {
         this.validate_files();
       }, 100)
     } else {
-      console.log(this.seleccion);
+      this.spinner.show();
+      setTimeout(() => {
+        this.do_transformacion();
+        this.spinner.hide();
+        this.files = [];
+        this.validate_files();
+      }, 100)
     }
+  }
+
+  do_transformacion() {
+    this.files.forEach((file: any) => {
+      let workbook = XLSX.read(file.file_base64, { type: 'base64' });
+      let content: any[] = [];
+      workbook.SheetNames.forEach(sheetName => {
+        let worksheet = workbook.Sheets[sheetName];
+        let worksheet_json = XLSX.utils.sheet_to_json(worksheet);
+        worksheet_json.forEach((row: any) => {
+          row['Ajuste Distribuido'] = '';
+        });
+        content.push(worksheet_json);
+      });
+      file.content = content;
+    });
+    this.build_xlsx_transformation(this.files, 'transformation');
+  }
+
+  build_xlsx_transformation(files: any[], filename: string) {
+    let merged: any[] = [];
+    files.forEach((file: any) => {
+      file.content.forEach((sheet: any) => {
+        sheet.forEach((row: any) => {
+          const linea_celular = row['USUARIO'];
+          const cupo = row['CUPO'];
+          for (const [key, value] of Object.entries(row)) {
+            if (key === 'USUARIO' || key === 'CUPO') {
+              continue;
+            }
+            merged.push({"LINEA_CELULAR": linea_celular,"CUPO": cupo, "SERVICIO_RCC": key, "VALOR": value});
+          }
+        });
+      });
+    });
+    const wb: XLSX.WorkBook = XLSX.utils.book_new();
+    wb.Props = {
+      Title: 'Consolidado de Plan Celular',
+      Subject: 'Consolidado de Plan Celular',
+      Author: 'Grupo KFC',
+      CreatedDate: new Date(),
+      Keywords: 'office Plan Celular',
+      Category: 'Plan Celular',
+    };
+    const ws: XLSX.WorkSheet = XLSX.utils.json_to_sheet(merged);
+    XLSX.utils.book_append_sheet(wb,ws,'Hoja1');
+    const filename_xlsx: string = (new Date()).toLocaleDateString() + '_' + filename + '.xlsx';
+    XLSX.writeFile(wb, filename_xlsx);
   }
 
   merge_xlsx(files: any[], filename: string) {
@@ -140,7 +201,9 @@ export class AppComponent {
       Category: 'Plan Celular',
     };
     const ws: XLSX.WorkSheet = XLSX.utils.json_to_sheet(merged);
-    XLSX.utils.book_append_sheet(wb,ws,'Hoja1');
+    const worksheet_json: any[] = XLSX.utils.sheet_to_json(ws, {header: 1});
+    const content_as_array: any[] = [[],[],[],[],[],[],[]].concat(worksheet_json);
+    XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(content_as_array),'Hoja1');
     const filename_xlsx: string = (new Date()).toLocaleDateString() + '_' + filename + '.xlsx';
     XLSX.writeFile(wb, filename_xlsx);
   }
