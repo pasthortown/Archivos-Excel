@@ -1,5 +1,4 @@
 import { Component } from '@angular/core';
-import { ToastrService } from 'ngx-toastr';
 import { NgxFileDropEntry, FileSystemFileEntry } from 'ngx-file-drop';
 import { FileSaverService } from 'ngx-filesaver';
 import * as XLSX from 'xlsx';
@@ -20,7 +19,6 @@ export class AppComponent {
   accept: string = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel';
 
   constructor(
-    private toastr: ToastrService,
     private fileServerService: FileSaverService,
     private spinner: NgxSpinnerService
     ) { }

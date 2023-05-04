@@ -6,7 +6,6 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { FileSaverModule } from 'ngx-filesaver';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { FormsModule } from '@angular/forms';
-import { ToastrModule } from 'ngx-toastr';
 import { NgxSpinnerModule } from 'ngx-spinner';
 import { NgxFileDropModule } from 'ngx-file-drop';
 
@@ -20,7 +19,6 @@ import { NgxFileDropModule } from 'ngx-file-drop';
     FormsModule,
     NgbModule,
     FileSaverModule,
-    ToastrModule.forRoot(),
     NgxSpinnerModule.forRoot({ type: 'ball-scale-multiple' }),
     NgxFileDropModule
   ],
