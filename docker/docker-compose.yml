@@ -1,0 +1,25 @@
+version: '3'
+
+networks:
+  conversor_net:
+    ipam:
+      config:
+        - subnet: 172.92.0.0/24
+
+services:
+  apache:
+    ports:
+    - "9494:80"
+    - "9595:9595"
+    image: php:apache
+    restart: always
+    volumes:
+    - ./conf/apache2.conf:/etc/apache2/apache2.conf
+    - ./xlsmergetool:/var/www/xlsmergetool
+    - ./sites:/etc/apache2/extra-enabled
+    - ./logs:/logs/apache/
+    networks:
+      conversor_net:
+        ipv4_address: 172.92.0.15
+    environment:
+      TZ: America/Bogota
