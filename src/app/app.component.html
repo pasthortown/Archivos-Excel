@@ -19,7 +19,6 @@
   <div class="row mt-2">
     <h1>{{seleccion}} de Archivos</h1>
     <div class="col-12">
-      <b *ngIf="seleccion!=='Consolidado'"><br/>Tomar en cuenta que El archivo debe tener las cabeceras en la Línea 8.<br/><br/></b>
       <ngx-file-drop dropZoneLabel="Arrastre los Archivos Aquí" (onFileDrop)="dropped($event)" accept="{{accept}}">
         <ng-template ngx-file-drop-content-tmp let-openFileSelector="openFileSelector">
           <p class="col-12 text-center" (click)="openFileSelector()">
