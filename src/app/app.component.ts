@@ -180,11 +180,55 @@ export class AppComponent {
     XLSX.writeFile(wb, filename_xlsx);
   }
 
+  es_numero(columna: string): boolean {
+    const columnas_numericas: string[] = [
+      'CUPO',
+      'TOTAL FACT LINEA',
+      '"01. MESES ADENDUM',
+      '"02. PAGOS PENDIENTES ADENDUM',
+      '"03. VALOR PENDIENTE ADENDUM',
+      'I.V.A. Por servicios (12%)',
+      'INTERNET MOVIL EMP 13GB INCL',
+      'Llamadas Claro a Claro',
+      'Llamadas Claro a Claro Holding',
+      'Llamadas Claro a Fijas',
+      'Llamadas Claro a Otecel',
+      'Llamadas Claro a Telecsa',
+      'Minutos Llamada Gratis',
+      'Minutos Llamadas Claro a Claro',
+      'Minutos Llamadas Claro a Claro Holding',
+      'Minutos Llamadas Claro a Fijas',
+      'Minutos Llamadas Claro a Otecel',
+      'Minutos Llamadas Claro a Telecsa',
+      'PAQ. 50 Min LDI - RI INCL',
+      'Paquete 500 SMS INCL',
+      'Tarifa Básica',
+      'Ajuste Distribuido',
+      'INTERNET MOVIL 15 INCL',
+      'Paq. 25 Min LDI INCL',
+      'Llamadas Internacionales',
+      'Minutos Llamadas Internacionales'
+    ];
+    return columnas_numericas.includes(columna);
+  }
+
   merge_xlsx(files: any[], filename: string) {
     let merged: any[] = [];
     files.forEach((file: any) => {
       file.content.forEach((sheet: any) => {
         sheet.forEach((row: any) => {
+          Object.keys(row).forEach((key) => {
+            if (this.es_numero(key)) {
+              if (row[key].toString().trim().length > 0) {
+                row[key] = Number.parseFloat(row[key]);
+                if (isNaN(row[key])) {
+                  row[key] = 0;
+                }
+              } else {
+                row[key] = 0;
+              }
+            }
+          });
           merged.push(row);
         });
       });
